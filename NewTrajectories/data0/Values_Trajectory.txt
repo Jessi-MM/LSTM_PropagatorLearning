@@ -1,0 +1,6 @@
+| Variable                                                      |   Value |
+|---------------------------------------------------------------+---------|
+| Divisiones en el grid (n):                                    |      32 |
+| Number of eigenstates to generate the initial wavepacket (k): |       1 |
+| Time of trajectory (t):                                       |     200 |
+| Step of trajectory:                                           |       1 |
