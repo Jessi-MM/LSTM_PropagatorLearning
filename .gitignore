@@ -1,0 +1,3 @@
+# ignore data because is too big file
+Data_Gaussian/
+.ipynb_checkpoints/
