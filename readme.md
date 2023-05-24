@@ -14,10 +14,10 @@ We implemented an LSTM model in PyTorch to propagate wave packets under certain 
 <a name="datagen"></a>
 ## Data Generation
 Our data is in the file `Data_Gaussian.tar.xz`.
-LSTM model uses wave packet and potential at time $t$ as input and returns the wave packet at time $t+\Deltat$ under potential given. We used an LSTM model because we aborded this problem as a time series problem.
+LSTM model uses wave packet and potential at time $t$ as input and returns the wave packet at time $t+ \Delta t$ under potential given. We used an LSTM model because we aborded this problem as a time series problem.
 ![In-Ou](img/dataInputOutput.png)
 
-To generate wave packets: $\psi(r,t)$ propagated in time we applied the DVR method to solve the Time Dependent Schrödinger Equation, using the *Proton Transfer System* as model of potential. We used a grid of $n=32$ points in the position space: $[-1.5,1.5]\AA$, each step of time was: $\Delta t= 1 fs$, and generated trajectories of $200fs$ (this is the sequence of lenght to the LSTM). We used 3290 trajectories to train the model. The next figure shows an example of what contains one trajectory.
+To generate wave packets: $\psi(r,t)$ propagated in time we applied the DVR method to solve the Time Dependent Schrödinger Equation, using the *Proton Transfer System* as model of potential. We used a grid of $n=32$ points in the position space: $[-1.5,1.5] \AA $, each step of time was: $\Delta t= 1 fs$, and generated trajectories of $200fs$ (this is the sequence of lenght to the LSTM). We used 3290 trajectories to train the model. The next figure shows an example of what contains one trajectory.
 
 ![Trajectory](img/DiagTrayectoria.png)
 
