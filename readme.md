@@ -1,70 +1,58 @@
-# Notas
+# LSTM to solve the Time Dependent Schrödinger Equation
 
-## Sobre `class ProtonTransfer`
+We implemented an LSTM model in PyTorch to propagate wave packets under certain kinds of time-dependent potentials through time.
 
+![Density&Potential](./src/Animacion/gifs/animation-dens&pot.gif)
 
-El constructor de la clase utiliza los siguientes valores:  
-- n: Número de puntos en el grid para el método DVR
-- a: Punto inicial del grid [angstroms]
-- b: Punto final del grid [angstroms]
-- k: Número de eigenestados incluidos para el paquete inicial de onda
-- time: True o False. Determina si se utiliza un potencial dependiente del tiempo: True, o independiente del tiempo: False  
-- var_random: True o False. True inicia las variables de manera aleatoria para el potencial del sistema. False solicita al usuario.
-- save_dir: Nombre del directorio donde se guardarán los datos del potencial y la evolución de onda.
+## Table of Contents
+1. [Data Generation](#datagen)
+2. [Architecture of the LSTM model](#arch)
+3. [Results and Predictions](#results)
+4. [Previous Works](#prevw)
+5. [About Physical System](#phys)
 
-*Ejemplo*:  
+<a name="datagen"></a>
+## Data Generation
+Our data is in the file `Data_Gaussian.tar.xz`.
+LSTM model uses wave packet and potential at time $t$ as input and returns the wave packet at time $t+\Deltat$ under potential given. We used an LSTM model because we aborded this problem as a time series problem.
+![In-Ou](img/dataInputOutput.png)
 
-`data = ProtonTransfer(k = 5, n = 32, a=-1.5, b=1.5, time=True, var_random=True, save_dir='data')`
+To generate wave packets: $\psi(r,t)$ propagated in time we applied the DVR method to solve the Time Dependent Schrödinger Equation, using the *Proton Transfer System* as model of potential. We used a grid of $n=32$ points in the position space: $[-1.5,1.5]\AA$, each step of time was: $\Delta t= 1 fs$, and generated trajectories of $200fs$ (this is the sequence of lenght to the LSTM). We used 3290 trajectories to train the model. The next figure shows an example of what contains one trajectory.
 
-### Para generar un paquete de onda inicial aleatorio   
+![Trajectory](img/DiagTrayectoria.png)
 
-Se utiliza el método Wavepacket_Init:
+The notebook to generate data is in `src/Proton_Transfer_DataGenerate.ipynb` and contains a guide to use the class.
 
-`data.Wavepacket_Init()`  
+<a name="arch"></a>
+## Architecture
+The proccesing of data, details of the LSTM model, and all the steps of the training and testing are in the notebook:  `src/ANN_models/LSTM-Model2.ipynb`.
 
-Devuelve un array de $n$ números complejos
+Sumary of model:
 
-### Para generar potenciales dependientes del tiempo:V(t) (valores aleatorios)
+| Layers | Features | Input/Output |
+|--------|----------|--------------|
+| LSTM   | 1024     | (96,1024)    |
+| LSTM   | 1024     | (1024,1024)  |
+| Linear | 64       | (1024,64)    |
 
-Se utiliza el método vector_potential:  
-`data.vector_potential(t, step)`  
+- Loss function: MSE
+- Optimizer: AdamW, weight_decay=0.01
+- learning rate: 1e-4
+- batch size: 10
+- epochs: 90
 
-Devuelve un array de $n$ números reales con el potencial [au] al tiempo t en cada punto del grid.  
-Actualización: Guarda los datos por cada step en la carpeta 'data/Potential/step-potential.npy'
+<a name="results"></a>
+## Results and Predictions
+The trained model was saved in: `src/ANN_Models/4700Data_LSTM_MODEL2/14-05-23_10EPOCHS.pth`
 
-### Para generar potenciales independientes del tiempo: V (valores aleatorios)
+We obtained an accuracy magnitud of 88% over a test set with 470 trajectories. The next figures shows some predictions by LSTM model.
 
-Se utiliza el método vector_potential:  
-`data.vector_potential_TI()`  
+![Predictions_step](img/1step.png)
+![Predictions_Traj](img/trajDens.png)
 
-Devuelve un array de $n$ números reales con el potencial [au] en cada punto del grid.   
-actualización: Guarda el potencial 'data/Potential/step-potential.npy'
-
-### Para generar un paquete de onda propagado al tiempo t con V(t)  
-
-Se utiliza el método evolution_wp:  
-`data.evolution_wp(t = 100, step = 1, gaussiana=False)`   
-
-Devuelve un array de $n$ números complejos correspondientes a la evolución de un paquete inicial (`data.Wavepacket_Init()`)al tiempo t [fs], con pasos de 1 [fs].  
-
-`data.evolution_wp(t = 100, step = 1, gaussiana=True)`  
-Devuelve un array de $n$ números complejos correspondientes a la evolución de un paquete inicial gaussiano al tiempo t [fs], con pasos de 1 [fs].  
-
-Actualización: Guarda el paquete de onda a cada step en el tiempo en: 'data/Wavepacket/step-wavepacket.npy'
-
-### Para generar un paquete de onda propagado al tiempo t con V  
-
-Se utiliza el método evolution_wp:  
-`data.evolution_wp_TI(t = 100, step = 1)`   
-
-Devuelve un array de $n$ números complejos correspondientes a la evolución de un paquete inicial al tiempo t [fs], con pasos de 1 [fs]. Para un potencial independiente del tiempo.   
-Actualización: Guarda el paquete de onda a cada step en el tiempo en: 'data/Wavepacket/step-wavepacket.npy'   
-
-### Guardar las variables de cada dato generado en archivos txt:
-`data.get_values_Trajectory(t, step=1)`
-`data.get_values_Potential()`
-
-
-## Sobre `class Potential_System`  
-
-Se utiliza para generar las funciones del modelo físico del potencial: [artículo principal](https://doi.org/10.1021/acs.jpclett.1c03117)
+<a name="prevw"></a>
+## Previous Works
+ [Artificial Neural Networks as Propagators in Quantum Dynamics](https://doi.org/10.1021/acs.jpclett.1c03117)
+ 
+<a name="phys"></a>
+## About Physical System
