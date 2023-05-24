@@ -47,6 +47,7 @@ The trained model was saved in: `src/ANN_Models/4700Data_LSTM_MODEL2/14-05-23_10
 
 We obtained an accuracy magnitud of 88% over a test set with 470 trajectories. The next figures shows some predictions by LSTM model.
 
+![Dens&Potgif](./src/Animacion/animationLSTM-dens&pot.gif)
 ![Predictions_step](img/1step.png)
 ![Predictions_Traj](img/trajDens.png)
 
