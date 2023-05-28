@@ -12,7 +12,7 @@ We implemented an LSTM model in PyTorch to propagate wave packets under certain 
 5. [About Physical System](#phys)
 
 <a name="datagen"></a>
-## Data Generation
+## Data Generation 
 Our data is in the file `Data_Gaussian.tar.xz`.
 LSTM model uses wave packet and potential at time $t$ as input and returns the wave packet at time $t+ \Delta t$ under potential given. We used an LSTM model because we aborded this problem as a time series problem.
 ![In-Ou](img/dataInputOutput.png)
@@ -57,3 +57,6 @@ We obtained an accuracy magnitud of 88% over a test set with 470 trajectories. T
  
 <a name="phys"></a>
 ## About Physical System
+:snail:
+
+
