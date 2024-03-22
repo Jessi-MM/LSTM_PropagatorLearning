@@ -2,7 +2,7 @@
 
 We implemented an LSTM model in PyTorch to propagate wave packets under certain kinds of time-dependent potentials through time.
 
-![Density&Potential](./src/Animacion/gifs/animation-dens&pot.gif)
+![Density&Potential](./src/Animation/gifs/animation-dens&pot.gif)
 
 ## Table of Contents
 1. [Data Generation](#datagen)
