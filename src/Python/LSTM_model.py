@@ -20,18 +20,15 @@ import os
 import matplotlib.colors as mcolors
 from matplotlib import rcParams
 from matplotlib import rc
-#----- pretty style n.n 
-rc('text', usetex=True)
-rc('font',**{'family':'serif','serif':['Palatino']})
 
-color1 = ['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93']
-color = ['#83b692','#f9ada0', '#f9627d', '#c65b7c', '#5b3758']
 
 path = '../../Data_Gaussian/data'  # Directory where are saving our data. (Currently there are 4700)
 seq_len = 200  # How many time stamps
-dataset = Propagator_Dataset(data=path, targets=path, transform=True, total_data = 4700, sequence_len=seq_len)
+n_grid = 32    # Number of points on the grid
+tot_data = 8000  # Number of trajectories
+
+dataset = Propagator_Dataset(data=path, targets=path, transform=True, total_data = tot_data*200, sequence_len=seq_len, n_grid=n_grid)
 dataset_size = len(dataset)
-print('Total of data ', dataset_size)
 
 #----- Train and validation split:
 test_split = 0.1
@@ -53,10 +50,12 @@ val_indices = indices[split_test:split_test+split_val]
 train_indices = indices[split_test+split_val:]
 
 # Creating PT data samplers and loaders:
+
 train_sampler = SubsetRandomSampler(train_indices)
 val_sampler = SubsetRandomSampler(val_indices)
 test_sampler = SubsetRandomSampler(test_indices)
 
+print('Total of data ', dataset_size)
 print(f"Total of train samples: {len(train_sampler)}")
 print(f"Total of validation samples: {len(val_sampler)}")
 print(f"Total of test samples: {len(test_sampler)}")
@@ -68,14 +67,16 @@ test_loader = DataLoader(dataset, batch_size=batch_size, sampler=test_sampler)
 
 # Shape of data
 for X, y in train_loader:
-    print("Train data:")
+    print("Train data info:")
+    print("-----------------------------------")
     print(f"Shape of X in train loader: {X.shape}")
     print(f"Shape of y in train loader: {y.shape}")
-    print(f"Batch size: {X.size(0)}")
     break
 
 #----- LSTM model
-device = 'cpu'
+#device = 'cpu'
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 class LSTM(nn.Module):
     def __init__(self, num_output, input_size, hidden_size, num_layers, seq_length):
         super(LSTM, self).__init__()
@@ -108,13 +109,16 @@ class LSTM(nn.Module):
         out = self.fc(output) #Final Output
         return out
 
-input_size = 96  # number of features: 32 real part +32 complex part +32 potential
+input_size = n_grid*3  # number of features: 32 real part +32 complex part +32 potential
 hidden_size = 1024  # number of features in hidden state
 num_layers = 2  # number of stacked lstm layers
 
-num_output = 64  # number of output: 32 real part + 32 complex part
+num_output = n_grid*2  # number of output: 32 real part + 32 complex part
 sequence_len = seq_len # lenght of time steps (1 fs each one) total 5 fs
 learning_rate = 1e-4
+
+print(f"Batch size: {batch_size}")
+print(f"Learning rate: {learning_rate}")
 
 model = LSTM(num_output, input_size, hidden_size, num_layers, sequence_len) #our lstm class
 # Initialize the loss function and optimizer
@@ -122,10 +126,11 @@ criterion = nn.MSELoss().to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)  #weight_decay=0.01 <- default
 print('----- Sumary of Model -----')
 print(model)
+print('---------------------------')
 
 
 #----- Accuracy function
-def S_overlap(Psi_true, Psi_ANN):
+def S_overlap(Psi_true, Psi_ANN, X):
     """
     Input:
     Psi_true: Evolution of wavepacket from dataset test, Shape: (batch size, sequence lenght, 64)
@@ -141,25 +146,25 @@ def S_overlap(Psi_true, Psi_ANN):
     angle_tot = []
     for j in range(batch_size):
         for l in range(seq_len):
-            Psi_true_re = Psi_true[j,l,0:32]  # real part of wavepacket
-            Psi_true_im = Psi_true[j,l,32:64]  # imaginary part of wavepacket
+            Psi_true_re = Psi_true[j,l,0:n_grid] + X[j,l,0:n_grid] # real part of wavepacket
+            Psi_true_im = Psi_true[j,l,n_grid:n_grid*2] + X[j,l,n_grid:n_grid*2] # imaginary part of wavepacket
             Psi_t = torch.view_as_complex(torch.stack((Psi_true_re,Psi_true_im), -1))
     
     
-            Psi_ANN_re = Psi_ANN[j,l,0:32]  # realpart of wavepacket predicted
-            Psi_ANN_im = -Psi_ANN[j,l,32:64]  # imaginary part of wavepacket predicted (- because conjugate)
+            Psi_ANN_re = Psi_ANN[j,l,0:n_grid]+ X[j,l,0:n_grid]  # realpart of wavepacket predicted
+            Psi_ANN_im = -(Psi_ANN[j,l,n_grid:n_grid*2]+ X[j,l,n_grid:n_grid*2])  # imaginary part of wavepacket predicted (- because conjugate)
             Psi_A = torch.view_as_complex(torch.stack((Psi_ANN_re,Psi_ANN_im), -1))
         
         
         
             overlap = []
-            for i in range(32):
+            for i in range(n_grid):
                 overlap.append(torch.tensor([Psi_A[i]*Psi_t[i]]))
             overl = torch.tensor(overlap)
         
             # Integrate over r (real integral + complex integral)
             # Simpson method in the grid r_n (angstroms -> au)
-            r_n = np.linspace(-1.5,1.5,32)*(1/0.5291775)
+            r_n = np.linspace(-1.5,1.5,n_grid)*(1/0.5291775)
             overl_real = overl.real.numpy()
             overl_imag = overl.imag.numpy()
     
@@ -176,8 +181,9 @@ def S_overlap(Psi_true, Psi_ANN):
     return S, angle
 
 #----- To use tensorboard
-com = input('Give a comment to SumaryWriter:')
-print('Example: Update2LSTM_1024neu_seq200_BATCH_10_LR_1E-4_4700DATA')
+#com = input('Give a comment to SumaryWriter:')
+#print('Example: Update2LSTM_1024neu_seq200_BATCH_10_LR_1E-4_4700DATA')
+com = 'Model5-LSTM'
 writer = SummaryWriter(comment=com)  # To use tensorboard
 
 for X,y in train_loader:
@@ -204,7 +210,7 @@ def train(dataloader, model, loss_fn, optimizer):
             loss, current = loss.item(), batch
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
     
-    writer.add_scalar("Loss/train", loss.item(), epoch)
+    writer.add_scalar("Loss/train", loss, epoch)
 
 #----- Test loop
 def test(dataloader, model, loss_fn):
@@ -214,11 +220,11 @@ def test(dataloader, model, loss_fn):
     test_loss, correctS, correct_phase = 0, 0, 0
     
     with torch.no_grad():
-        for X, y in dataloader:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        for X, y in dataloader:                                                                                         
             X, y = X.to(device), y.to(device)
             pred = model(X.float())
             test_loss += loss_fn(pred, y).item()
-            S, angle = S_overlap(y, pred)  
+            S, angle = S_overlap(y, pred, X)  
             correctS += S
             correct_phase += angle
     
@@ -236,7 +242,7 @@ def test(dataloader, model, loss_fn):
     print(f"Test Error: \n Accuracy phase: {(correct_phase):>0.1f}\n")
 
 #----- Training
-epochs = 90
+epochs = 5
 for epoch in range(0,epochs):
     print(f"Epoch {epoch+1}\n-------------------------------")
     train(train_loader, model, criterion, optimizer)
@@ -244,5 +250,8 @@ for epoch in range(0,epochs):
     
 writer.flush()
 
-name_model = input('Name of model:')
-torch.save(model, './4700Data_LSTM_MODEL2/'+name_model)
+PATH = '../Models'
+if not os.path.exists(PATH):
+    os.makedirs(PATH)
+    
+torch.save(model, './Models/Model5-5epochs.pth')

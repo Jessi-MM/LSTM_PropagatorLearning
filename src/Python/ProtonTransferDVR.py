@@ -1,12 +1,10 @@
 import random
 import numpy as np
-from numpy import ogrid
 from numpy.linalg import eig
 import matplotlib.pyplot as plt
 import cmath
 from scipy import integrate
 from tabulate import tabulate
-import matplotlib.animation as anim
 import os
 
 class Potential_System:
@@ -16,6 +14,7 @@ class Potential_System:
         # Potential System variables:
         if time == True:  # Time Dependent Potential
             if var_random == True:
+                # Random variables of potential
                 self.V = 10*1.5936e-3  # Electronic coupling [kcal/mol] -> au
                 self.w1 = random.uniform(1500,4000)*4.556e-6   # Frecuencies of the harmonic proton potentials [cm^-1] -> au
                 self.w2 = random.uniform(1500,4000)*4.556e-6   # Frecuencies of the harmonic proton potentials [cm^-1] -> au
@@ -263,7 +262,7 @@ class ProtonTransfer(Potential_System):
         os.makedirs('./'+self.save_dir+'/Wavepacket')
         os.makedirs('./'+self.save_dir+'/Potential')
         
-        self.r_n = ogrid[self.a:self.b:(0+1j)*self.n]  # Grid position [au]
+        self.r_n = np.linspace(self.a,self.b,self.n) # Grid position [au]
         super().__init__(time = self.time, var_random = self.var_random)
         
     
@@ -408,13 +407,14 @@ class ProtonTransfer(Potential_System):
         return V
     
     #=== Hamiltonian Matrix ==============================
-    def H_DVR(self,t):
+    def H_DVR(self,t, T_DVR):
         """
         input: tiempo [fs]
+        T: kinetic energy matrix (constant everytime)
     
         output: Matriz Hamiltoniana DVR [au]
         """
-        T_DVR = self.KINETIC_DVR()
+        #T_DVR = self.KINETIC_DVR()
         t = t*41.34  # fs -> au
         H = T_DVR + self.V_DVR(t)
         return H
@@ -449,20 +449,20 @@ class ProtonTransfer(Potential_System):
     
     #=== Propagation wavepacket Time Dependent Potential ==========================
     # Find eigenvalues and eigenvectors:
-    def eigenN(self,t):
-        Eigen_n, U = eig(self.H_DVR(t))
+    def eigenN(self,t, T_DVR):
+        Eigen_n, U = eig(self.H_DVR(t, T_DVR))
     
         U_inv = np.linalg.inv(U)
     
-        D = np.dot(np.dot(U_inv, self.H_DVR(t)),U)
+        D = np.dot(np.dot(U_inv, self.H_DVR(t, T_DVR)),U)
         D = (complex(0,-1))*t*D
         
         return Eigen_n, U, U_inv, D
     
     
-    def Psi_VDR_t(self, t, Psi_DVR_inicial):
+    def Psi_VDR_t(self, t, Psi_DVR_inicial, T_DVR):
     
-        Eigen_n, U, U_inv, D = self.eigenN(t)
+        Eigen_n, U, U_inv, D = self.eigenN(t, T_DVR)
     
         Diag = np.zeros([self.n,self.n], dtype = 'complex_')
         for i in range(self.n):
@@ -489,7 +489,7 @@ class ProtonTransfer(Potential_System):
         Output:
         wp: Wavepacket evolucionado con el método DVR bajo el potencial V(t)
         """
-        
+        T_DVR = self.KINETIC_DVR()
         #-if t == 0:
             #-wp = self.Wavepacket_Init()
             #-with open(os.path.join('./'+self.save_dir+'/Wavepacket', str(t)+'-wave.npy'), 'wb') as f:
@@ -510,7 +510,7 @@ class ProtonTransfer(Potential_System):
                 
         
         else:
-            wp = self.Psi_VDR_t(t, self.evolution_wp(t-step, step, gaussiana))
+            wp = self.Psi_VDR_t(t, self.evolution_wp(t-step, step, gaussiana),T_DVR)
             with open(os.path.join('./'+self.save_dir+'/Wavepacket', str(t)+'-wave.npy'), 'wb') as f:
                 np.save(f, wp)
                 

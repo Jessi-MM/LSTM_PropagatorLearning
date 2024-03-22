@@ -3,4 +3,12 @@ Data_Gaussian/
 Data_Gaussian_Test/
 NewTrajectories/
 src/Animacion/data0_g/
+src/DataLoader/
+src/DataNew/
+src/Models/
+src/Python/__pycache__/DataProcessing.cpython-39.pyc
+src/Python/job_data.sh
+src/Python/runs/
+src/runs/
+
 .ipynb_checkpoints/
