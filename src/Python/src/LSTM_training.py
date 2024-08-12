@@ -16,6 +16,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import integrate
 import os
+import h5py
 
 seq_len = 200  # How many time stamps
 n_grid = 32    # Points on the grid
