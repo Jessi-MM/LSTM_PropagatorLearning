@@ -1,6 +1,7 @@
 # LSTM to solve the Time Dependent Schrödinger Equation
 
-We implemented an LSTM model in PyTorch to propagate wave packets under certain kinds of time-dependent potentials through time.
+> [!abstract] 
+> We implemented an LSTM model in PyTorch to propagate wave packets under certain kinds of time-dependent potentials through time.
 
 ![Density&Potential](./src/Animation/gifs/animation-dens&pot.gif)
 
@@ -17,7 +18,7 @@ We implemented an LSTM model in PyTorch to propagate wave packets under certain 
 LSTM model uses wave packet and potential at time $t$ as input and returns the wave packet at time $t+ \Delta t$ under potential given. We used an LSTM model because we aborded this problem as a time series problem.
 ![In-Ou](img/dataInputOutput.png)
 
-To generate wave packets: $\psi(r,t)$ propagated in time we applied the DVR method to solve the Time Dependent Schrödinger Equation, using the *Proton Transfer System* as model of potential. We used a grid of $n=32$ points in the position space: $[a=-1.5, b=1.5]\,\mathring{A}$, each step of time was: $\Delta t= 1 fs$, and generated trajectories of $200fs$ (this is the sequence of length to the LSTM). The next figure shows an example of what contains one trajectory.
+To generate wave packets $\psi(r,t)$ propagated through time we applied the DVR method to solve the Time Dependent Schrödinger Equation, using the *Proton Transfer System* as model of potential. We used a grid of $n=32$ points in the position space $[a=-1.5, b=1.5]\mathring{A}$, each step of time was $\Delta t= 1 fs$, and generated trajectories of $200fs$ (this is the sequence of length to the LSTM). The next figure shows an example of what contains one trajectory.
 
 ![Trajectory](img/DiagTrayectoria.png)
 
@@ -50,13 +51,13 @@ The processing of data, details of the LSTM model, and all the steps of the trai
 
 <a name="training"></a>
 ## Results and Predictions 📈
-The trained model was saved in: `src/ANN_Models/4700Data_LSTM_MODEL2/14-05-23_10EPOCHS.pth`
+The trained model was saved in: `src/ANN_Models/4700Data_LSTM_MODEL2/14-05-23_10EPOCHS.pth`   
 
-To compare our results, we used $|S|$ and $\theta$ parameters of the accuracy function:
+To compare our results, we used $|S|$ and $\theta$ parameters of the accuracy function:  
 $$S=\langle \psi_{LSTM}|\psi_{True}\rangle = |S|e^{i \theta}$$
-which compares the two wavefunction, the expected $\psi_{True}$ and the predicted with the LSTM model $\psi_{LSTM}$. If we have two equal wavefunction, given that they are normalised, it follows that:
-$$\langle \psi|\psi\rangle = \int_a^b dr\,\psi(r) \psi(r)^\dagger = \int_a^b|\psi(r)|\,dr = 1 = |S|e^{i\theta} \iff |S|=1\text{ and }\theta=0$$
-We obtained an average magnitude accuracy of $|S|=0.946$ and an average phase accuracy of $\theta=0.0001$  over a test set with 800 trajectories. The next figures shows some predictions by LSTM model.
+which compares the two wavefunction, the expected $\psi_{True}$ and the predicted with the LSTM model $\psi_{LSTM}$. If we have two equal wavefunction, given that they are normalised, it follows that:   
+$$\langle \psi|\psi\rangle = \int_a^b dr\psi(r) \psi(r)^\dagger = \int_a^b|\psi(r)|dr = 1 = |S|e^{i\theta} \iff |S|=1\text{ and }\theta=0$$
+We obtained an average magnitude accuracy of $|S|=0.946$ and an average phase accuracy of $\theta=0.0001$  over a test set with 800 trajectories. The next figures shows some predictions by LSTM model.   
 
 ![Dens&Potgif](./src/Animacion/animationLSTM-dens&pot.gif)
 ![Predictions_step](img/1step.png)
