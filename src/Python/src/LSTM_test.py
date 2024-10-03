@@ -16,9 +16,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import integrate
 import os
+import time
 import h5py
 from LSTM_mudule import LSTM
 
+
+assess = False  # Evaluate the trained model in the test set
+save_prediction = True  # Save some predictions
 
 
 seq_len = 200  # How many time stamps
@@ -33,8 +37,7 @@ dataset_size = len(dataset)
 
 #----- H Parameters:
 batch_size = 10
-epochs = 5
-learning_rate = 1e-4
+
 
 #----- Train and validation split:
 test_split = 0.1
@@ -154,4 +157,35 @@ def test1(dataloader, model):
     print(f"Test Error: \n Accuracy Magnitude |S|: {(100*correctS):>0.1f}%")
     print(f"Test Error: \n Accuracy phase: {(correct_phase):>0.1f}\n")
 
-test1(test_loader, model)
+
+for X,y in test_loader:
+    X, y = X.to(device), y.to(device)
+    
+    Entrada = X
+    
+    Salida = y
+
+    with torch.inference_mode():
+        Prediccion = model(X.float())
+    break
+
+if assess:
+    test1(test_loader, model)
+else:
+    pass
+
+if save_prediction:
+    # To save data in a file
+    directory = '../../Predictions/'
+    # Creating the file
+    h5f = h5py.File(directory+time.strftime("%Y%m%d-%H%M%S")+'.h5', 'w')
+    # Saving X data
+    h5f.create_dataset('dataset_X', data=Entrada)
+    # Saving y data
+    h5f.create_dataset('dataset_y', data=Salida)
+    h5f.create_dataset('dataset_p', data=Prediccion)
+    
+    # Closing the file 
+    h5f.close()
+    print("Your file is saved!")
+    
