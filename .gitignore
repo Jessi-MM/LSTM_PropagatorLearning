@@ -1,6 +1,5 @@
 # ignore data because is too big file
-Data_Gaussian/
-Data_Gaussian_Test/
+Data/
 NewTrajectories/
 src/Animacion/data0_g/
 src/DataLoader/
