@@ -6,7 +6,7 @@ import matplotlib.animation as anim
 color = ['#83b692','#f9ada0', '#f9627d', '#c65b7c', '#5b3758']
 
 
-LSTM_compar = True
+LSTM_compar = False
 
 # Loading data LSTM predited
 if LSTM_compar:
@@ -17,8 +17,8 @@ if LSTM_compar:
     y_lstm = h5f.get('dataset_p')
 else:
     # Loading data DVR data generated
-    data_path = '../DataNew/'  #input("Give the data path: ")
-    h5f = h5py.File(data_path+'ngrid200_delta.h5', 'r')  # name of file
+    data_path = '../data/DataNew/'  #input("Give the data path: ")
+    h5f = h5py.File(data_path+'ngrid32_delta_20250116-193307.h5', 'r')  # name of file
     X_vis = h5f.get('dataset_X')
     y_vis = h5f.get('dataset_y')
 
@@ -33,7 +33,7 @@ a = -1.5  # initial point in angstroms
 b = 1.5  # final point in angstroms
 r_n = np.linspace(a,b,n_grid)
 
-dat = 2 # Choosing a data
+dat = 0 # Choosing a data
 
 if LSTM_compar:
     X_r = X_vis[dat,:,0:n_grid]*np.sqrt(1/0.5291775)
