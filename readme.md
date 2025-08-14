@@ -2,7 +2,7 @@
 
 We implemented an LSTM model in PyTorch to propagate wave packets under certain kinds of time-dependent potentials through time.
 
-![Density&Potential](./src/Animation/gifs/animation-dens&pot.gif)
+![Density&Potential](./animations/gifs/1animationLSTM-dens&pot.gif)
 
 ## Table of Contents
 1. [Data Generation](#datagen)
@@ -15,17 +15,17 @@ We implemented an LSTM model in PyTorch to propagate wave packets under certain 
 <a name="datagen"></a>
 ## Data Generation 📊
 LSTM model uses wave packet and potential at time $t$ as input and returns the wave packet at time $t+ \Delta t$ under potential given. We used an LSTM model because we view this problem as a time series problem.
-![In-Ou](img/dataInputOutput.png)
+![In-Ou](./img/dataInputOutput.png)
 
 To generate wave packets $\psi(r,t)$ propagated through time we applied the DVR method to solve the Time Dependent Schrödinger Equation, using the *Proton Transfer System* as model of potential. We used a grid of $n=32$ points in the position space $[a=-1.5, b=1.5]\mathring{A}$, each step of time was $\Delta t= 1 fs$, and generated trajectories of $200fs$ (this is the sequence of length to the LSTM). The next figure shows an example of what contains one trajectory.
 
-![Trajectory](img/DiagTrayectoria.png)
+![Trajectory](./img/DiagTrayectoria.png)
 
-The notebook to generate data is in `src/Proton_Transfer_DataGenerate.ipynb` and contains a guide to use the class.
+The notebook to generate data is in [data generation notebook](./notebooks/data_generation.ipynb) and contains a guide to use the class.
 
 <a name="arch"></a>
 ## Architecture 🛠️
-The processing of data, details of the LSTM model, and all the steps of the training and testing are in the notebook:  `src/ANN_models/LSTM-Model2.ipynb`.
+The processing of data, details of the LSTM model, and all the steps of the training and testing are in the notebook: [training notebook](./notebooks/02_trainingLSTM_last_model.ipynb)
 
 ### Summary of model:
 
