@@ -50,7 +50,6 @@ The processing of data, details of the LSTM model, and all the steps of the trai
 
 <a name="training"></a>
 ## Results and Predictions 📈
-The trained model was saved in: `src/ANN_Models/4700Data_LSTM_MODEL2/14-05-23_10EPOCHS.pth`   
 
 To compare our results, we used $|S|$ and $\theta$ parameters of the accuracy function:  
 $$S=\langle \psi_{LSTM}|\psi_{True}\rangle = |S|e^{i \theta}$$     
