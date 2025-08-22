@@ -11,3 +11,4 @@ src/Python/runs/
 src/runs/
 
 .ipynb_checkpoints/
+notebooks/output_hnn.ipynb
