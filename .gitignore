@@ -1,4 +1,6 @@
 # ignore data because is too big file
+models/
+runs/
 data/
 NewTrajectories/
 src/Animacion/data0_g/
