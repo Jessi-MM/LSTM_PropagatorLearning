@@ -77,10 +77,10 @@ for epoch in range(num_epochs):
     epoch_loss /= len(train_loader.dataset)
 
     # --- Propagate validation set using new propagate_dataset ---
-    pred_trajs, true_trajs = propagate_dataset(model, val_loader, device, seq_len_init=1)
+    pred_trajs, true_trajs, delta_pred, delta_true = propagate_dataset(model, val_loader, device, seq_len_init=1)
 
     # Compute average validation loss
-    val_loss = np.mean([criterion(pred, true).item() for pred, true in zip(pred_trajs, true_trajs)])
+    val_loss = np.mean([criterion(pred, true).item() for pred, true in zip(delta_pred, delta_true)])
     print(f"Epoch [{epoch+1}/{num_epochs}] Train Loss: {epoch_loss:.6f} | Validation Loss: {val_loss:.6f}")
 
     # --- Overlap accuracy ---

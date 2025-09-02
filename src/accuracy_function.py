@@ -32,3 +32,19 @@ def compute_overlap(psi_true, psi_pred, dx=1.0):
     S = torch.sum(torch.conj(psi_true_c) * psi_pred_c) * dx
 
     return torch.abs(S).item(), torch.angle(S).item()
+
+if __name__ == "__main__":
+    import h5py
+    data_path = "../data/data_ngrid32_seq200_250827-212005.h5"
+    # --- Load Data ---
+    with h5py.File(data_path, 'r') as h5f:
+        X_vis = h5f['dataset_X'][:]
+        y_vis = h5f['dataset_y'][:]
+
+    # select a trajectory
+    traj_idx = 0
+    psi = torch.tensor(X_vis[traj_idx], dtype=torch.float32)
+
+    # compute overlap with itself (should be 1.0, 0.0)
+    absS, theta = compute_overlap(psi, psi)
+    print(f"Self-overlap: |S|={absS:.4f}, θ={theta:.4f} rad")
