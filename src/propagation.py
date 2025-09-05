@@ -47,7 +47,7 @@ def propagate_trajectory(model, X_seq, y_seq, device, seq_len_init=1):
     with torch.no_grad():
         for t in range(prediction_len + 1):
             output, (h_0, c_0) = model(current_seq, (h_0, c_0))
-            delta = output[:, -1, :]  
+            delta = output[:, -1, :].squeeze(0)  
             delta_pred.append(delta)
 
             last_psi = current_seq[0, -1, :2*num_grid_points]
