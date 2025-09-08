@@ -105,8 +105,8 @@ def create_dataloader(file_path, batch_size=32, shuffle=True, verbose=True, spli
 
 # Test
 if __name__ == "__main__":
-    file_path = '../data/data_delta.h5'  # Example path
-    dataloader = create_dataloader(file_path, batch_size=8, verbose=True, split=True)
+    file_path = '/Users/jessicamartinez/Projects/Propagator/Paper/data_128grid/Data_128grid_new2.h5'  # Example path
+    dataloader = create_dataloader(file_path, batch_size=8, verbose=True, split=False)
    
     
     #for X_batch, y_batch in dataloader:

@@ -6,6 +6,7 @@ upload_src.sh
 src/old_versions
 .vscode/
 Icon
+.DS_Store
 data/
 NewTrajectories/
 src/Animacion/data0_g/
