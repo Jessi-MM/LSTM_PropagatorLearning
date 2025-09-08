@@ -2,6 +2,10 @@
 models/
 runs/
 logs/
+upload_src.sh
+src/old_versions
+.vscode/
+Icon
 data/
 NewTrajectories/
 src/Animacion/data0_g/
